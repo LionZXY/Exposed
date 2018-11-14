@@ -1,4 +1,5 @@
 @file:Suppress("PackageDirectoryMismatch")
+
 package org.jetbrains.exposed.exceptions
 
 import org.jetbrains.exposed.dao.EntityClass
@@ -6,15 +7,16 @@ import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.QueryBuilder
 import org.jetbrains.exposed.sql.Transaction
+import org.jetbrains.exposed.sql.statements.Statement
 import org.jetbrains.exposed.sql.statements.StatementContext
 import org.jetbrains.exposed.sql.statements.expandArgs
 import org.jetbrains.exposed.sql.vendors.DatabaseDialect
 import java.sql.SQLException
 
-class EntityNotFoundException(val id: EntityID<*>, val entity: EntityClass<*, *>): Exception("Entity ${entity.klass.simpleName}, id=$id not found in database")
+class EntityNotFoundException(val id: EntityID<*>, val entity: EntityClass<*, *>) : Exception("Entity ${entity.klass.simpleName}, id=$id not found in database")
 
 class ExposedSQLException(cause: Throwable?, val contexts: List<StatementContext>, private val transaction: Transaction) : SQLException(cause) {
-    fun causedByQueries() : List<String> = contexts.map {
+    fun causedByQueries(): List<String> = contexts.map {
         try {
             if (transaction.debug) {
                 it.expandArgs(transaction)
@@ -32,7 +34,7 @@ class ExposedSQLException(cause: Throwable?, val contexts: List<StatementContext
 
     private val originalSQLException = cause as? SQLException
 
-    override fun getSQLState(): String  = originalSQLException?.sqlState.orEmpty()
+    override fun getSQLState(): String = originalSQLException?.sqlState.orEmpty()
 
     override fun getErrorCode(): Int = originalSQLException?.errorCode ?: 0
 
@@ -42,3 +44,17 @@ class ExposedSQLException(cause: Throwable?, val contexts: List<StatementContext
 class UnsupportedByDialectException(baseMessage: String, val dialect: DatabaseDialect) : UnsupportedOperationException(baseMessage + ", dialect: ${dialect.name}.")
 
 internal fun Transaction.throwUnsupportedException(message: String): Nothing = throw UnsupportedByDialectException(message, db.dialect)
+
+typealias ExceptionHandlerListener = ((Statement<*>, Transaction, Exception) -> Unit)
+
+object Exceptions {
+    private var exceptionHandler: ExceptionHandlerListener? = null
+
+    public fun setHandleException(exceptionHandlerListener: ExceptionHandlerListener) {
+        exceptionHandler = exceptionHandlerListener
+    }
+
+    public fun reportException(query: Statement<*>, transaction: Transaction, exception: Exception) {
+        exceptionHandler?.invoke(query, transaction, exception)
+    }
+}

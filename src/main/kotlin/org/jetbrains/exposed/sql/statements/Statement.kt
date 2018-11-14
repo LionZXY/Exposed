@@ -1,5 +1,6 @@
 package org.jetbrains.exposed.sql.statements
 
+import org.jetbrains.exposed.exceptions.Exceptions
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.IColumnType
 import org.jetbrains.exposed.sql.Table
@@ -58,6 +59,7 @@ abstract class Statement<out T>(val type: StatementType, val targets: List<Table
         val result = try {
             statement.executeInternal(transaction)
         } catch (e: SQLException) {
+            Exceptions.reportException(this, transaction, e)
             throw ExposedSQLException(e, contexts, transaction)
         }
         transaction.currentStatement = null
