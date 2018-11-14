@@ -45,16 +45,18 @@ class UnsupportedByDialectException(baseMessage: String, val dialect: DatabaseDi
 
 internal fun Transaction.throwUnsupportedException(message: String): Nothing = throw UnsupportedByDialectException(message, db.dialect)
 
-typealias ExceptionHandlerListener = ((Statement<*>, Transaction, Exception) -> Unit)
 
 object Exceptions {
+    interface ExceptionHandlerListener {
+        fun <T> processException(query: Statement<T>, transaction: Transaction, exception: Exception): T
+    }
     private var exceptionHandler: ExceptionHandlerListener? = null
 
     public fun setHandleException(exceptionHandlerListener: ExceptionHandlerListener) {
         exceptionHandler = exceptionHandlerListener
     }
 
-    public fun reportException(query: Statement<*>, transaction: Transaction, exception: Exception) {
-        exceptionHandler?.invoke(query, transaction, exception)
+    public fun <T> processException(query: Statement<T>, transaction: Transaction, exception: Exception): T {
+        return exceptionHandler?.processException(query, transaction, exception) ?: throw exception
     }
 }

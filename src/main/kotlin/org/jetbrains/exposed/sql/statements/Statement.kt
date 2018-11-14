@@ -59,8 +59,7 @@ abstract class Statement<out T>(val type: StatementType, val targets: List<Table
         val result = try {
             statement.executeInternal(transaction)
         } catch (e: SQLException) {
-            Exceptions.reportException(this, transaction, e)
-            throw ExposedSQLException(e, contexts, transaction)
+            Exceptions.processException(this, transaction, ExposedSQLException(e, contexts, transaction))
         }
         transaction.currentStatement = null
         transaction.executedStatements.add(statement)
