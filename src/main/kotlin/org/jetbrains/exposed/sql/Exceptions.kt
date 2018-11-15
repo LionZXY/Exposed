@@ -48,7 +48,7 @@ internal fun Transaction.throwUnsupportedException(message: String): Nothing = t
 
 object Exceptions {
     interface ExceptionHandlerListener {
-        fun <T> processException(query: Statement<T>, transaction: Transaction, exception: Exception): T
+        fun <T> processException(query: Statement<T>, transaction: Transaction, exception: Exception): T?
     }
     private var exceptionHandler: ExceptionHandlerListener? = null
 
@@ -56,7 +56,7 @@ object Exceptions {
         exceptionHandler = exceptionHandlerListener
     }
 
-    public fun <T> processException(query: Statement<T>, transaction: Transaction, exception: Exception): T {
+    public fun <T> processException(query: Statement<T>, transaction: Transaction, exception: Exception): T? {
         return exceptionHandler?.processException(query, transaction, exception) ?: throw exception
     }
 }
