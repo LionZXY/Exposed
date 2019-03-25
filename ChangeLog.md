@@ -1,3 +1,96 @@
+# 0.13.5
+Bug fixes: 
+* Initialize client defaults only for target entity table columns (was broken in #0.13.4 with [#526](https://github.com/JetBrains/Exposed/issues/526)
+
+# 0.13.4
+Infrastructure:
+* Finished moving to Gradle Kotlin DSL. Many thanks to Thanks for PR goes to Vladislav Tankov (@tanvd).  
+
+Deprecation:
+* `InsertStatement.generatedKey` is forbidden to use now in favour to `resultValues` and `insertAndGetId`
+
+Features:
+* InsertStatement.get function was split into get and getOrNull to simplify get use. 
+Thanks for PR goes to Johannes Jensen (@spand) 
+
+Bug fixes:
+* clientDefault is called multiple times gives incorrect value ([#526](https://github.com/JetBrains/Exposed/issues/526))
+* Fix composite PK bugs (Thanks Aidar Samerkhanov (@Darych) for PR): 
+  incorrect evaluation of last column index in PK and
+  missed column description DDL in ALTER TABLE for non H2 databases.
+* forUpdate value was ignored in warmUp* functions when was applied to mapLazy/cached references
+* Join on two tables with more than one foreign key constraint fails even with additionalConstraint ([#522](https://github.com/JetBrains/Exposed/issues/522))  
+
+# 0.13.3
+Bug fixes:
+* Unable to create index on column that also has a foreign key with `createMissingTablesAndColumns`, fix for MySQL ([#498](https://github.com/JetBrains/Exposed/issues/498))
+* Use memberProperties instead of declaredMemberProperties in with/preloadRelations. 
+
+# 0.13.2
+Bug fixes: 
+* Wrong values returned from warmUp* functions which leads to N + 1
+
+# 0.13.1
+Features:
+* Eager Loading ([#420](https://github.com/JetBrains/Exposed/issues/420)). More information and how to use it could found at [wiki](https://github.com/JetBrains/Exposed/wiki/DAO#eager-loading).
+
+Bug fixes:
+* Unable to create index on column that also has a foreign key with `createMissingTablesAndColumns` ([#498](https://github.com/JetBrains/Exposed/issues/498))
+* Using createMissingTablesAndColumns() generates a spurious WARN message in log files ([#480](https://github.com/JetBrains/Exposed/issues/480))
+* Unexpected value of type Int: 26 of org.jetbrains.exposed.dao.EntityID ([#501](https://github.com/JetBrains/Exposed/issues/501))
+* More proper handling of forUpdate/notForUpdate/orderBy on LazySizedCollection
+* Problems on comparing binary types (bit from MySQL) ([#491](https://github.com/JetBrains/Exposed/issues/491))
+
+
+# 0.12.2
+Kotlin updated to 1.3.21
+
+Features:
+* DAO: It's possible to call `orderBy` on `SizedIterable` to sort entities ([#476](https://github.com/JetBrains/Exposed/issues/476))
+* DSL/DAO: Self join many-to-many relationships ([#106](https://github.com/JetBrains/Exposed/issues/106)). See [wiki page](https://github.com/JetBrains/Exposed/wiki/DAO#parent-child-reference) for example.
+* DSL: Allow to apply groupConcat on expressions ([#486](https://github.com/JetBrains/Exposed/issues/486)). Thanks for PR goes to Edvinas Danevičius (@Edvinas01). 
+* Log every SQLException thrown inside inTopLevelTransaction with warn instead of info level
+* SQLServer dialect will now use `uniqueidentifier` for UUID columns
+* Compound operations introduced: `compoundAnd`/`compoundOr`([#469](https://github.com/JetBrains/Exposed/issues/469))
+* `Op.TRUE`/`Op.FALSE` expressions added
+* OR operator was optimized to use less braces
+* Oracle: Speedup extracting tableColumns metadata    
+
+Bug fixes: 
+* Impossible to set default value with nullable column ([#474](https://github.com/JetBrains/Exposed/issues/474))
+* UUID value not read correctly ([#473](https://github.com/JetBrains/Exposed/issues/473))
+* `No key generated` exception thrown when trying to insert row to IdTable using `insertAndGetId` with explicit id and then make search by returned id ([#432](https://github.com/JetBrains/Exposed/issues/432))      
+
+Deprecations:
+* orderBy with boolean sort parameters was deprecated
+ 
+
+# 0.12.1
+Features:
+* MariaDB support
+* Suspending `transaction` functions ([#418](https://github.com/JetBrains/Exposed/issues/418))
+* DAO: It's possible to specify forUpdate state in warmup* functions
+
+Bug fixes:
+* Fixed condition when IllegalStateException should be thrown on LazySizedCollection forUpdate/notForUpdate
+* `inTopLevelTransaction` accepts `Database` instead of `TransactionManager` ([#448](https://github.com/JetBrains/Exposed/issues/448))
+* LIMIT is not supported in DELETE SQLite message ([#455](https://github.com/JetBrains/Exposed/issues/455))
+* Limit propagate is same entity ([#439](https://github.com/JetBrains/Exposed/issues/439))
+* forIds/forEntityIds wont return partially cached values
+* Accessing enum field in `Entity` created using `EntityClass.new` causes `ClassCastException` ([#464](https://github.com/JetBrains/Exposed/issues/464))
+* `NoClassDefFoundError` when creating table on Android ([#461](https://github.com/JetBrains/Exposed/issues/461))
+* `exec(String)` throws `SQLException: ResultSet already requested` ([#414](https://github.com/JetBrains/Exposed/issues/414))
+* SQLite autoincrement table is not created correctly ([#328](https://github.com/JetBrains/Exposed/issues/328))  
+
+Deprecations:
+* Deprecate InsertStatement.generatedKey ([#424](https://github.com/JetBrains/Exposed/issues/424))
+* Using of`Transactions.logger` is prohibited  
+* `SchemaUtils.createIndex` with columns and isUnique parameters is prohibited
+* `groupConcat` with boolean sortOrder is replaced with similar `SortOrder` version
+* `join` is replaced with `innerJoin`
+* enumeration/enumerationByName with java `Class` replaced with kotlin `KClass`
+ 
+
 # 0.11.2
 * Kotlin #1.3.0
 * Fixed bug that call for createMissingTablesAndColumns could lead to exception while trying to add an index which already exists in db (*MySQL only problem*)
